@@ -18,4 +18,17 @@ const accessToken = async(user) => {
   });
 }
 
-export default accessToken;
+
+const accessToken2= async(user) => {
+  const payLoad = {
+    _id : user._id,
+     serviceProviderNameFromAccessToken : user.serviceProviderName,
+    serviceProviderEmailFromAccessToken  : user.serviceProviderEmail,
+    serviceProviderPhoneFromAccessToken : user.serviceProviderPhone
+  }
+  return jwt.sign(payLoad, SECRET_KEY , {
+    expiresIn : jwt_time
+  });
+}
+
+export { accessToken, accessToken2 };

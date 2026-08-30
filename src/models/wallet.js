@@ -5,7 +5,7 @@ const walletSchema = new mongoose.Schema({
     type : mongoose.Schema.Types.ObjectId,
     ref : 'user'
   },
-  walletBalance : {
+  walletCoins : {
     type : Number ,
     default : 0
   }
