@@ -9,12 +9,10 @@ const transactionSchema = new mongoose.Schema({
   receiverId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    required: true
   },
   providerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ServiceProvider',
-    required: true
   },
   transactionAmount: {
     type: Number,
