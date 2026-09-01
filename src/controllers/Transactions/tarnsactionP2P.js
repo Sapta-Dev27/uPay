@@ -4,6 +4,7 @@ import Transaction from '../../models/transaction.js';
 import Wallet from '../../models/wallet.js';
 import ServiceProvider from '../../models/serviceProvider.js';
 import UPID from '../../models/upid.js';
+import Account from '../../models/account.js';
 
 const makeP2PTransactionByUPID = async (req, res) => {
   try {
@@ -81,6 +82,28 @@ const makeP2PTransactionByUPID = async (req, res) => {
 
     findSenderWallet.walletCoins += 100;
     await findSenderWallet.save();
+
+    const findSenderAccount = await Account.findOne({ userId: senderId });
+    if (!findSenderAccount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sender account not found'
+      })
+    }
+
+    findSenderAccount.accountBalance -= amount;
+    await findSenderAccount.save();
+
+    const findReceiverAccount = await Account.findOne({ userId: receiverId });
+    if (!findReceiverAccount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Receiver account not found'
+      })
+    }
+
+    findReceiverAccount.accountBalance += amount;
+    await findReceiverAccount.save();
 
     const createTransaction = await Transaction.create({
       senderId: senderId,
@@ -197,6 +220,22 @@ const makeP2PTransactionByPhoneNumber = async (req, res) => {
     findSenderWallet.walletCoins += 100;
     await findSenderWallet.save();
 
+    const findSenderAccount = await Account.findOne({ userId: senderId });
+    if (!findSenderAccount) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Sender account not found'
+      })
+    }
+     
+    const findReceiverAccount = await Account.findOne({ userId: receiverId });  
+    if (!findReceiverAccount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Receiver account not found'
+      })
+    } 
+
     const createTransaction = await Transaction.create({
       senderId: senderId,
       receiverId: receiverId,
@@ -238,22 +277,22 @@ const makeP2PTransactionByPhoneNumber = async (req, res) => {
   }
 }
 
-const fetchAllTransactions = async(req , res) => {
-  try{
-     const findAllTransactions = await Transaction.find();
-     if(!findAllTransactions){
+const fetchAllTransactions = async (req, res) => {
+  try {
+    const findAllTransactions = await Transaction.find();
+    if (!findAllTransactions) {
       return res.status(404).json({
         success: false,
         message: 'No transactions found'
       })
-     }
-     return res.status(200).json({
-       success: true,
-       message: 'Transactions found',
-       data: findAllTransactions
-     })
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Transactions found',
+      data: findAllTransactions
+    })
   }
-  catch(error){
+  catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -263,4 +302,4 @@ const fetchAllTransactions = async(req , res) => {
 }
 
 
-export { makeP2PTransactionByUPID, makeP2PTransactionByPhoneNumber  , fetchAllTransactions }
+export { makeP2PTransactionByUPID, makeP2PTransactionByPhoneNumber, fetchAllTransactions }
