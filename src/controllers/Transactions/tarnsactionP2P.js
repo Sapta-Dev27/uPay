@@ -1,10 +1,10 @@
 import express from 'express';
-import User from '../../models/user.js';
-import Transaction from '../../models/transaction.js';
-import Wallet from '../../models/wallet.js';
-import ServiceProvider from '../../models/serviceProvider.js';
-import UPID from '../../models/upid.js';
-import Account from '../../models/account.js';
+import User from '../../models/User.js';
+import Transaction from '../../models/Transactions.js';
+import Wallet from '../../models/Wallet.js';
+import ServiceProvider from '../../models/ServiceProvider.js';
+import UPID from '../../models/Upid.js';
+import Account from '../../models/AccountUser.js';
 
 const makeP2PTransactionByUPID = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ const makeP2PTransactionByUPID = async (req, res) => {
     }
 
     const findSenderUPID = await UPID.findOne({
-      upid: senderUPID
+      upidId: senderUPID
     })
 
     if (!findSenderUPID) {
@@ -29,7 +29,7 @@ const makeP2PTransactionByUPID = async (req, res) => {
     }
 
     const findReceiverUPID = await UPID.findOne({
-      upid: reqUPID
+      upidId: reqUPID
     })
 
     if (!findReceiverUPID) {
@@ -108,7 +108,7 @@ const makeP2PTransactionByUPID = async (req, res) => {
     const createTransaction = await Transaction.create({
       senderId: senderId,
       receiverId: receiverId,
-      amount: amount,
+      transactionAmount: amount,
       transactionStatus: 'success',
       transactionType: 'P2P',
       description: `Transaction from ${findSender.name} to ${findReceiver.name}`
@@ -158,7 +158,7 @@ const makeP2PTransactionByPhoneNumber = async (req, res) => {
     }
 
     const findSender = await User.findOne({
-      phoneNumber: senderPhoneNumber
+      userPhone: senderPhoneNumber
     })
 
     if (!findSender) {
@@ -169,7 +169,7 @@ const makeP2PTransactionByPhoneNumber = async (req, res) => {
     }
 
     const findReceiver = await User.findOne({
-      phoneNumber: receiverPhoneNumber
+      userPhone: receiverPhoneNumber
     })
 
     if (!findReceiver) {
@@ -222,24 +222,24 @@ const makeP2PTransactionByPhoneNumber = async (req, res) => {
 
     const findSenderAccount = await Account.findOne({ userId: senderId });
     if (!findSenderAccount) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
         message: 'Sender account not found'
       })
     }
-     
-    const findReceiverAccount = await Account.findOne({ userId: receiverId });  
+
+    const findReceiverAccount = await Account.findOne({ userId: receiverId });
     if (!findReceiverAccount) {
       return res.status(404).json({
         success: false,
         message: 'Receiver account not found'
       })
-    } 
+    }
 
     const createTransaction = await Transaction.create({
       senderId: senderId,
       receiverId: receiverId,
-      amount: amount,
+      transactionAmount: amount,
       transactionStatus: 'success',
       transactionType: 'P2P',
       description: `Transaction from ${findSender.name} to ${findReceiver.name}`

@@ -1,5 +1,5 @@
 import express from 'express';
-import User from '../models/user.js';
+import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import MPIN from '../models/MPIN.js';
 
@@ -23,7 +23,7 @@ const createMPIN = async (req, res) => {
     }
 
     const findUser = await User.findOne({
-      email: useremail
+      userEmail: useremail
     })
 
     if (!findUser) {
@@ -33,6 +33,9 @@ const createMPIN = async (req, res) => {
         message: 'User not found'
       })
     }
+
+    console.log("Email from token:", useremail);
+    console.log("Found user:", findUser);
 
     const weakMPINs = ['0000', '1234', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1234', '4321'];
 
@@ -47,17 +50,23 @@ const createMPIN = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedMPIN = await bcrypt.hash(mpin, salt);
 
-    const updateUser = await User.findOneAndUpdate({
-      email: useremail
-    }, {
-      mpin: hashedMPIN
-    }, {
-      new: true
-    })
+    findUser.userMPIN = hashedMPIN;
+    await findUser.save();
 
+    console.log("After save:", findUser);
+   
     const createMPIN = await MPIN.create({
       mpin: hashedMPIN,
       userId: findUser._id
+    })
+
+    return res.status(201).json({
+      success: true,
+      message: 'MPIN created successfully',
+      data: {
+        userId: findUser._id,
+        mpin: createMPIN.mpin
+      }
     })
   }
   catch (error) {

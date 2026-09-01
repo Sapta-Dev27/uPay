@@ -1,7 +1,8 @@
 import express from 'express';
 import 'dotenv/config'
+import jwt from 'jsonwebtoken';
 
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY_ACCESS_TOKEN;
+const JWT_SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
 
 const authMiddleware = (req, res, next) => {
   try {
@@ -20,7 +21,7 @@ const authMiddleware = (req, res, next) => {
         message: 'Token is missing'
       })
     }
-    const decoded = jwt.verify(token, jwt.JWT_SECRET_KEY);
+    const decoded = jwt.verify(token, JWT_SECRET_KEY);
     if (!decoded) {
       console.log('Token is invalid');
       return res.status(401).json({
@@ -28,6 +29,8 @@ const authMiddleware = (req, res, next) => {
         message: 'Token is invalid. Authentication failed'
       })
     }
+    console.log('Token is valid. Authentication successful');
+    console.log('Decoded token:', decoded);
     req.userInfo = decoded;
     next();
   }

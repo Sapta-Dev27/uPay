@@ -1,9 +1,10 @@
 import express from 'express';
-import Account from '../models/Account.js';
-import User from '../models/User.js';
-import ServiceProvider from '../models/ServiceProvider.js';
-import Wallet from '../models/Wallet.js';
-import AccountService from '../models/AccountService.js';
+import User from '../../models/User.js';
+import ServiceProvider from '../../models/ServiceProvider.js';
+import Wallet from '../../models/Wallet.js';
+import AccountService from '../../models/AccountService.js';
+import Account from '../../models/AccountUser.js';
+import Transaction from '../../models/Transactions.js';
 
 const processTransaction = async (req, res) => {
   try {
@@ -18,7 +19,7 @@ const processTransaction = async (req, res) => {
       })
     }
 
-    const findServiceProvider = await ServiceProvider.findOne({ serviceName: serviceName });
+    const findServiceProvider = await ServiceProvider.findOne({ providerName :  serviceName });
     if (!findServiceProvider) {
       return res.status(404).json({
         success: false,
@@ -58,7 +59,7 @@ const processTransaction = async (req, res) => {
     findServiceProvider.providerBalance += amount;
     await findServiceProvider.save();
 
-    const findWallet = await Wallet.findOne({ userId: userId });
+    const findWallet = await Wallet.findOne({ userId: req.userInfo._id });
     if (!findWallet) {
       return res.status(404).json({
         success: false,
@@ -74,21 +75,12 @@ const processTransaction = async (req, res) => {
 
 
 
-    const findServiceProviderAccount = await AccountService.findOne({ userId: findServiceProvider._id });
-    if (!findServiceProviderAccount) {
-      return res.status(404).json({
-        success: false,
-        message: "Service Provider account not found"
-      })
-    }
-
-    findServiceProviderAccount.accountBalance += amount;
-    await findServiceProviderAccount.save();
+    
 
     const createTransaction = await Transaction.create({
-      userId: userId,
-      serviceProviderId: findServiceProvider._id,
-      amount: amount,
+      senderId: userId,
+      receiverId: findServiceProvider._id,
+      transactionAmount: amount,
       status: "Success"
     })
 
@@ -110,4 +102,4 @@ const processTransaction = async (req, res) => {
 }
 
 
-export { processTransaction };
+export default processTransaction;

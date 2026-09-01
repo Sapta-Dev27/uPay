@@ -2,8 +2,9 @@ import express from 'express' ;
 import 'dotenv/config'
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'
-import user from '../models/user.js';
-
+import User from '../models/User.js';
+import { accessToken } from '../lib/accessToken.js' ;
+import { refreshToken } from '../lib/refershToken.js'
 
 const loginController = async( req , res) => {
   try{
@@ -15,7 +16,7 @@ const loginController = async( req , res) => {
       })
      }
      const findUser = await User.findOne({
-      username : username
+      userName : username
      })
      if( !findUser){
       return res.status(404).json({
@@ -23,7 +24,7 @@ const loginController = async( req , res) => {
         message : 'User not found'
       })
      }
-     const checkPass = await bcrypt.compare(password , findUser.password);
+     const checkPass = await bcrypt.compare(password , findUser.userPassword);
      if(!checkPass){
       return res.status(400).json({
         success : false,
@@ -36,14 +37,16 @@ const loginController = async( req , res) => {
      return res.status(200).json({
       success : true,
       message : 'User logged in successfully',
+      data : findUser,
       accessToken : accessTokenValue,
       refreshToken : refreshTokenValue
     })
   }
   catch(error){
     console.log('Something went wrong in login controller');
+    console.log(error.message);
     return res.status(500).json({
-      message : 'Something went wrong in login controller',
+      message : error.message,
       success : false
     })
   }

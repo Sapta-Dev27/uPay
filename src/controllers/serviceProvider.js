@@ -1,6 +1,6 @@
-import express from express;
-import ServiceProvider from '../models/serviceProvider.js';
-import UPID from '../models/UPID.js';
+import express from 'express';
+import ServiceProvider from '../models/ServiceProvider.js';
+import UPID from '../models/Upid.js';
 import { accessToken2 } from '../lib/accessToken.js';
 import { refreshToken2 } from '../lib/refershToken.js';
 
@@ -23,11 +23,11 @@ const createProvider = async (req, res) => {
       })
     }
 
-    const newProvider = new ServiceProvider.create({
-      providerName,
-      providerType,
-      providerEmail,
-      providerPhone
+    const newProvider = await ServiceProvider.create({
+      providerName: providerName,
+      providerType: providerType,
+      providerEmail: providerEmail,
+      providerPhone: providerPhone
     })
 
     await newProvider.save();
@@ -54,16 +54,25 @@ const createProvider = async (req, res) => {
 
 const generateUPIService = async (req, res) => {
   try {
-    const serviceProviderName = req.userInfo.serviceProviderNameFromAccessToken;
-    const serviceProviderEmail = req.userInfo.serviceProviderEmailFromAccessToken;
-    const serviceProviderPhone = req.userInfo.serviceProviderPhoneFromAccessToken;
+    const serviceProviderId = req.userInfo._id;
+
+    const serviceProvider = await ServiceProvider.findById(serviceProviderId);
+    if (!serviceProvider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service provider not found'
+      })
+    }
+
+    const serviceProviderName = serviceProvider.providerName;
+    const serviceProviderPhone = serviceProvider.providerPhone;
 
 
     const upiId = serviceProviderName + serviceProviderPhone + '@' + 'upay';
 
-    const newUPI = new UPID.create({
-      _id: req.userInfo._id,
-      upiId: upiId
+    const newUPI = await UPID.create({
+      userId: serviceProviderId,
+      upidId: upiId
     });
     await newUPI.save();
 
@@ -81,7 +90,7 @@ const generateUPIService = async (req, res) => {
   catch (error) {
     console.log(error);
     return res.status(500).json({
-      message: 'Internal Server Error',
+      message: error.message,
       success: false
     })
   }

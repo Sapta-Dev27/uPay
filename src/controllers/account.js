@@ -1,7 +1,7 @@
 import express from 'express';
 import Account from '../models/AccountUser.js';
-import User from '../models/user.js';
-import ServiceProvider from '../models/serviceProvider.js';
+import User from '../models/User.js';
+import ServiceProvider from '../models/ServiceProvider.js';
 import AccountService from '../models/AccountService.js';
 
 const createUserAccount = async (req, res) => {
@@ -61,12 +61,9 @@ const createServiceProviderAccount = async (req, res) => {
   try {
     const { accNo } = req.body;
     const userId = req.userInfo._id;
-    const serviceProviderName = req.userInfo.serviceProviderNameFromAccessToken;
 
-    const findServiceProvider = await ServiceProvider.findOne({
-      userId: userId,
-      serviceProviderName: serviceProviderName
-    });
+
+    const findServiceProvider = await ServiceProvider.findById(userId);
 
     if (!findServiceProvider) {
       return res.status(404).json({
@@ -88,8 +85,7 @@ const createServiceProviderAccount = async (req, res) => {
 
     const newAccount = await AccountService.create({
       userId: userId,
-      accountNumber: accNo,
-      serviceProviderName: serviceProviderName
+      accountNumber: accNo
     });
 
     if (!newAccount) {
@@ -141,4 +137,30 @@ const fetchAllAccounts = async (req, res) => {
   }
 }
 
-export { createUserAccount, createServiceProviderAccount, fetchAllAccounts };
+
+
+const fetchAllServiceProviderAccounts = async (req, res) => {
+  try {
+    const accounts = await AccountService.find();
+    if (!accounts || accounts.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No accounts found'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Accounts fetched successfully',
+      data: accounts
+    })
+  }
+  catch (error) {
+    console.log('Error fetching accounts:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+export { createUserAccount, createServiceProviderAccount, fetchAllAccounts , fetchAllServiceProviderAccounts };

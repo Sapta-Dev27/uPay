@@ -5,11 +5,10 @@ const accountSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "User"
+    ref: "ServiceProvider"
   },
   serviceProviderName: {
     type: String,
-    required: true
   },
   accountNumber: {
     type: String,

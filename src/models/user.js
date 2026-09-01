@@ -25,11 +25,9 @@ const userSchema = new mongoose.Schema({
   },
   userUPID: {
     type: String,
-    unique: true
   },
   userMPIN: {
     type: String,
-    minLength: 4
   },
   userAge: {
     type: Number,

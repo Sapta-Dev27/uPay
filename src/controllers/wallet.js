@@ -1,6 +1,6 @@
 import express from "express";
-import Wallet from "../models/wallet.js";
-import User from "../models/user.js";
+import Wallet from "../models/Wallet.js";
+import User from "../models/User.js";
 
 const createWallet = async (req, res) => {
   try {
@@ -81,7 +81,37 @@ const transferCoins = async (req, res) => {
   }
 }
 
+
+
+const fetchAllWallets = async (req, res) => {
+  try {
+    const fetchAllWallets = await Wallet.find();
+    
+    if (!fetchAllWallets || fetchAllWallets.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No wallets found'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'All wallets fetched successfully',
+      data: fetchAllWallets
+    })
+
+  }
+  catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
 export {
   createWallet,
-  transferCoins
+  transferCoins,
+  fetchAllWallets
 }

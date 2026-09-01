@@ -1,10 +1,10 @@
 import express from 'express';
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
-import jwt from jsonwebtoken;
-import User from '../models/user.js';
-import accessToken from '../lib/accessToken.js';
-import refreshToken from '../lib/refershToken.js';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import {accessToken} from '../lib/accessToken.js';
+import {refreshToken} from '../lib/refershToken.js';
 
 const register = async (req, res) => {
   try {
@@ -33,10 +33,10 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      username,
-      email,
-      phone,
-      password: hashedPassword
+      userName: username,
+      userEmail: email,
+      userPhone: phone,
+      userPassword: hashedPassword
     })
 
     const refreshTokenValue = await refreshToken(newUser);
@@ -53,8 +53,9 @@ const register = async (req, res) => {
   }
   catch (error) {
     console.log('Something went wrong in register controller');
+    console.log(error.message);
     return res.status(500).json({
-      message: 'Something went wrong in register controller',
+      message: error.message,
       success: false
     })
   }

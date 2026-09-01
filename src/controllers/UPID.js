@@ -1,11 +1,11 @@
 import express from 'express';
-import User from '../models/user.js';
+import User from '../models/User.js';
 import bcrypt from 'bcrypt';
-import upid from '../models/UPID.js';
+import upid from '../models/Upid.js';
 
 const createUPID = async (req, res) => {
   try {
-    const userphone = req.userInfo.phoneFromAccessToken;
+    const userphone = req.userInfo.userphoneFromAccessToken;
     const username = req.userInfo.usernameFromAccessToken;
 
     const generateUPID = username + userphone + "@upay";
@@ -21,7 +21,7 @@ const createUPID = async (req, res) => {
     }
 
     const findUser = await User.findOne({
-      email: req.userInfo.emailFromAccessToken
+      userEmail: req.userInfo.emailFromAccessToken
     })
 
     if (!findUser) {
@@ -31,16 +31,11 @@ const createUPID = async (req, res) => {
       })
     }
 
-    const updateUser = await User.findOneAndUpdate({
-      email: req.userInfo.emailFromAccessToken
-    }, {
-      upid: generateUPID
-    }, {
-      new: true
-    })
+    findUser.userUPID = generateUPID;
+    await findUser.save();
 
     const createUPID = await upid.create({
-      upid: generateUPID,
+      upidId: generateUPID,
       userId: findUser._id
     })
 

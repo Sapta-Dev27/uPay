@@ -24,7 +24,6 @@ const serviceProviderSchema = new mongoose.Schema({
   },
   providerUpiID : {
     type : String ,
-    unique : true
   },
   providerBalance : {
     type : Number ,
